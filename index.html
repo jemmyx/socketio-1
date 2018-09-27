@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+  <head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; margin:0;padding:0;}
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 100%; margin-right: .5%; }
+      form button { width: 50px; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      form button {     width: 50px;
+    background: rgb(130, 224, 255);
+    border: none;
+    padding: 10px;
+    position: absolute;
+    margin-top: -35px;
+    right: 0;
+    margin-right: 3px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      #istyping { background: white;font-size: 11px;font-style: italic;padding: 7px; }
+    </style>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script>
+		$(function(){
+			
+			var socket = io();
+			
+			//demander le pseudo
+			
+			var nickname = prompt("Entre ton nom");
+			
+			socket.emit('newbie', nickname);
+			
+			//poser le focus sur l'input
+			$('#m').focus();
+			
+			$('form').submit(function(){
+				socket.emit('chat message', $('#m').val());
+				$('#m').val('');
+				return false;
+			});
+			
+
+			socket.on('chat message', function(msg){
+			  $('#messages').append($('<li>').html(msg));
+			  $('#istyping').html('');
+			});
+			
+			socket.on('user typing', function(msg){
+				$('#istyping').html(msg);
+			});
+			
+			$('#poke').click(function(e){
+				e.preventDefault();
+				socket.emit('message', 'xxx');
+			});
+			
+			$('#m').keypress(function(e){
+			
+				//13 = ENTER
+				if(e.which!=13){
+					socket.emit('user typing')
+				}
+			
+			});
+		});
+	</script>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+	<a style="display:none;" href="#" id="poke">Poker le serveur</a>
+	<div>
+	  <div id="istyping"></div>
+		<form action="">
+		  <input id="m" autocomplete="off" /><button>Send</button>
+		</form>
+	</div>
+  </body>
+</html>
